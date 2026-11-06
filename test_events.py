@@ -27,15 +27,26 @@ def test_bad_token_is_rejected(base_url):
 
 def test_unknown_event_returns_404(auth_headers, base_url):
     response = requests.get(
-         f"{base_url}/events/999999999",
-         headers=auth_headers,
+        f"{base_url}/events/999999999",
+        headers=auth_headers,
     )
-    event = response.json()["data"][0]
-    assert response.status_code==404
+    assert response.status_code == 404
 
-    for key in ["id","title", "city", "price","venue","category"]:
-        assert key in event, f"missing key:{key}"
+
+def test_event_has_expected_shape(auth_headers, base_url):
+    response = requests.get(
+        f"{base_url}/events",
+        headers=auth_headers,
+    )
+    assert response.status_code == 200
+
+    event = response.json()["data"][0]
+
+    for key in ["id", "title", "city", "price", "venue", "category"]:
+        assert key in event, f"missing key: {key}"
 
     assert isinstance(event["id"], int)
     assert isinstance(event["title"], str)
     assert isinstance(event["totalSeats"], int)
+    assert isinstance(event["city"], str)
+    assert isinstance(event["price"], str)
