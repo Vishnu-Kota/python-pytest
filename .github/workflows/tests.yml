@@ -1,0 +1,33 @@
+name: Python API Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest -v --html=report.html --self-contained-html
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          EVENTHUB_EMAIL: ${{ secrets.EVENTHUB_EMAIL }}
+          EVENTHUB_PASSWORD: ${{ secrets.EVENTHUB_PASSWORD }}
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: pytest-report
+          path: report.html
+          retention-days: 30
